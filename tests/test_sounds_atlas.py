@@ -3,6 +3,8 @@ vectors made by the model earshot loads; the blend keeps a named job's lexical w
 a request that only describes a sound, and never lets a design the hard filters exclude (chip sound, loop, a job
 ruled out) win on how it sounds; `make` without listening loads no model and says when its pick is a guess.
 Fast tests use the atlas file and stubbed semantic scores; `slow` ones load CLAP."""
+import os
+import subprocess
 import sys
 
 import numpy as np
@@ -124,10 +126,20 @@ def test_blend_names_the_semantic_evidence(idx):
 # ---- make: no model without listening, and a guess says so
 
 def test_make_without_listen_loads_no_model(tmp_path):
-    from earshot.make import make
-    r = make('a soft success chime', str(tmp_path / 's.wav'))
-    assert r['files'] and not atlas.warm()
-    assert 'torch' not in sys.modules
+    # Other tests legitimately import torch or warm the atlas. Check cold-start
+    # behaviour in a fresh process instead of depending on their execution order.
+    code = """import sys
+from earshot.make import make
+from earshot.sounds import atlas
+r = make('a soft success chime', sys.argv[1])
+assert r['files'] and not atlas.warm()
+assert 'torch' not in sys.modules
+"""
+    r = subprocess.run([sys.executable, '-c', code, str(tmp_path / 's.wav')],
+                       cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                       env={**os.environ, 'PYTHONOPTIMIZE': '0'},
+                       capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stdout + r.stderr
 
 
 def test_guess_line():

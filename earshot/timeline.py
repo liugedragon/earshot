@@ -1214,7 +1214,7 @@ def timeline(path, video=None, cues=None, start=None, end=None, detail='normal',
     if cache and not fresh and os.path.exists(cfile):
         try:
             with open(cfile, encoding='utf-8') as fh:
-                return dict(json.load(fh), cached=True, file=path)  # the path as given now
+                return dict(json.load(fh), cached=True, file=path, video=video)  # paths as given now
         except Exception:
             pass
     r = _analyse(path, pr, video, cue_list, cue_fps, start, end, DETAIL[detail], cache and not fresh)

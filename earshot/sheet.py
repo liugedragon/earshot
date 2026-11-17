@@ -188,7 +188,7 @@ def sheet(path, out_png, video=None, cues=None, start=None, end=None, detail='no
     for text, size, weight, color in lines:
         yy += size * 0.725 / 72
         fig.text(left_px / width, 1 - yy / fig_h, text, fontsize=size, fontfamily=FONT, weight=weight, va='center',
-                 color=color)
+                 color=color, parse_math=False)
         yy += size * 0.725 / 72
     n_thumbs = 0
     if video:
@@ -225,7 +225,7 @@ def sheet(path, out_png, video=None, cues=None, start=None, end=None, detail='no
         lab = s['label'] if len(s['label']) <= n_chars else s['label'][:max(0, n_chars - 2)] + '..'
         if n_chars >= 4:
             ax.text(a + (t1 - t0) * 4 / plot_px, 0.5, lab, va='center', ha='left', fontsize=fs * 0.9, fontfamily=FONT,
-                    clip_on=True)
+                    clip_on=True, parse_math=False)
     lane_title(ax, 'sections')
 
     ax = axes['labels']
@@ -245,13 +245,15 @@ def sheet(path, out_png, video=None, cues=None, start=None, end=None, detail='no
         kind = text.split(' ', 1)[0]
         col, alpha = KIND_COLOR.get(kind.rstrip('?'), '#777777'), 0.55 if kind.endswith('?') else 1.0
         ax.text(a, yy, text, fontsize=lf, fontfamily=MONO, va='center', ha='left', color='white',
-                bbox=dict(boxstyle='square,pad=0.15', fc=col, ec='none', alpha=alpha), clip_on=False, zorder=3)
+                bbox=dict(boxstyle='square,pad=0.15', fc=col, ec='none', alpha=alpha), clip_on=False, zorder=3,
+                parse_math=False)
         ax.plot([t, t], [0, yy - 0.5 / n_rows + 0.02], color=col, lw=1.0, alpha=alpha, zorder=2)
     lane_title(axes['labels'], 'events')
     xk = 1 - right_px / width
     for k in sorted({text.split(' ', 1)[0].rstrip('?') for _, _, _, text in placed}, reverse=True):
         fig.text(xk, 1 - 0.32 / fig_h, k, fontsize=fs * 0.85, fontfamily=MONO, ha='right', va='center',
-                 color='white', bbox=dict(boxstyle='round,pad=0.25', fc=KIND_COLOR.get(k, '#777777'), ec='none'))
+                 color='white', bbox=dict(boxstyle='round,pad=0.25', fc=KIND_COLOR.get(k, '#777777'), ec='none'),
+                 parse_math=False)
         xk -= (len(k) * char_px * 0.9 + 22) / width
 
     ax = axes['spec']
